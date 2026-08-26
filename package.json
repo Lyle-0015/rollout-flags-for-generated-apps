@@ -1,0 +1,7 @@
+{
+  "name": "rollout-flags-for-generated-apps",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=18" },
+  "devDependencies": { "tsx": "^4" }
+}

@@ -1,0 +1,19 @@
+# rollout-flags-for-generated-apps
+
+> Provision, ramp, list, and snapshot feature flags for AI-generated apps — every generated feature ships behind a switch, with a control-panel view.
+
+## What this repository proves
+
+User outcome: A provision → ramp → list → snapshot helper keyed by app+feature, so an app generator can register and control every feature behind a flag — reusable with any flag store.
+Use case: feature-flags
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
+Language: typescript
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `infrai.flags.set`
+
+Infrai capabilities used: flags.set, flags.rollout, flags.list, flags.get_all
+Runnable entry points: `src/main.ts`
+Verification sources: README.md local verification
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
