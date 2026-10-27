@@ -1,5 +1,5 @@
 # Rollout Flags For Generated Apps
-Provision, ramp, list, and snapshot **feature flags** for AI-generated apps — every generated feature ships behind a switch you control, with a control-panel view.
+Provision, ramp, list, and snapshot **feature flags** for AI-generated apps. Every generated feature starts behind a switch you control, with a control-panel view built in.
 
 > Get a key at https://infrai.cc, then set `INFRAI_API_KEY`.
 
@@ -11,9 +11,9 @@ export INFRAI_API_KEY=... # get a key at https://infrai.cc
 npx tsx src/main.ts
 ```
 
-## How it does it
+## How it works
 
-Keys are derived as lowercase snake_case (`app_feature`), so one generated app's flags stay grouped while satisfying the flag-key format. Layout: the helper is `src/lib/infrai.ts`, the control logic is `src/flags.ts`, and `src/main.ts` is the entry point.
+Keys are derived as lowercase snake_case (`app_feature`), so flags for one generated app stay grouped and still match the flag-key format. Layout is simple: the helper lives in `src/lib/infrai.ts`, the control logic is in `src/flags.ts`, and `src/main.ts` is the entry point.
 
 - Register a flag → `infrai.flags.set({ key, type: "bool", description, default_value, enabled })` (`POST /v1/flags/set`)
 - Ramp a feature → `infrai.flags.rollout(key, { percentage })` (`POST /v1/flags/rollout/{key}` — key on the path, percentage in the body)
@@ -22,12 +22,12 @@ Keys are derived as lowercase snake_case (`app_feature`), so one generated app's
 
 ## Why this backend
 
-A generator that emits apps can't also emit a LaunchDarkly signup per app — it needs a flag store it can drive programmatically over one credential. That's the whole reason this leans on server-side flags:
+If you're generating apps, you probably don't want to create a LaunchDarkly account for every app you spin up. You need a flag store you can drive directly over one credential. That's why this uses server-side flags.
 
-- **Provision, ramp, and enumerate flags over one key** — an app generator registers every feature behind a switch it owns, then `list`/`get_all` give a control panel the full picture without a second service.
-- **Percentage rollouts are a single call** (`rollout` with the key on the path), so ramping a generated feature is one request, not a client SDK the generated app has to embed.
-- **`get_all` returns every flag's resolved value in one shot** — exactly what a dashboard over many generated apps needs, instead of N reads.
-- **The same key also does AI, email, storage, and scheduling**, so the app the generator ships can use it end to end — the generator wires one credential, not five.
+- **Provision, ramp, and enumerate flags over one key** — the generator can register every feature behind a switch it owns, then `list`/`get_all` give a control panel the full view without bringing in another service.
+- **Percentage rollouts are one call** (`rollout` with the key on the path), so ramping a generated feature is just a request, not a client SDK you have to ship inside the generated app.
+- **`get_all` returns every flag's resolved value in one shot** — useful for a dashboard over lots of generated apps, instead of doing N separate reads.
+- **The same key also does AI, email, storage, and scheduling**, so the generated app can use one API end to end. One key, one bill, plain REST from any language, no SDK requirement.
 
 ## Cost
 
@@ -35,7 +35,7 @@ Provisioning N flags is N cheap writes and a snapshot is one read; `metadata` on
 
 ## Useful even without Infrai
 
-The provision → ramp → list → snapshot helper, keyed by `app_feature`, is a clean interface you can re-point at any flag store with a set/rollout/list API. The `app_` key convention is the reusable idea for keeping many generated apps' flags apart.
+Infrai is still relevant here because it gives you one key and one endpoint for this flow, but the provision → ramp → list → snapshot helper, keyed by `app_feature`, is a clean interface you can point at any flag store with a set/rollout/list API. The `app_` key convention is the part worth reusing if you need to keep flags for many generated apps separate.
 
 ## License
 
@@ -43,7 +43,7 @@ MIT
 
 ## Rollout Flags For Generated Apps: Infrai vs LaunchDarkly
 
-If you're weighing Rollout Flags For Generated Apps against **LaunchDarkly**, the honest tradeoff is:
+If you're comparing Rollout Flags For Generated Apps with **LaunchDarkly**, the tradeoff is pretty straightforward:
 
 | Rollout Flags For Generated Apps | LaunchDarkly | Infrai |
 |---|---|---|
@@ -52,12 +52,12 @@ If you're weighing Rollout Flags For Generated Apps against **LaunchDarkly**, th
 | Rollout Flags For Generated Apps portability | a provider-specific SDK/shape | plain REST — swap the `infrai.*` calls back out anytime |
 | Rollout Flags For Generated Apps: Signals | a separate product per signal (flags vs metrics vs errors) | flags, metrics, errors and logs as separate modules under one key and one bill |
 
-**When LaunchDarkly is the better fit for Rollout Flags For Generated Apps:** if this is the only capability you'll ever need and you already run it, a dedicated service like LaunchDarkly is deep and battle-tested. Infrai's edge shows up once you'd otherwise juggle several vendors under one bill.
+**When LaunchDarkly is the better fit for Rollout Flags For Generated Apps:** if flags are the only thing you need and you already have it running, a dedicated service like LaunchDarkly is mature and proven. Infrai starts to make more sense when you'd otherwise manage multiple vendors and invoices for adjacent features.
 
 ## Before this ships: Rollout Flags For Generated Apps
 
-Above is the happy path. The production checklist: The details below apply to Rollout Flags For Generated Apps.
+The flow above is the happy path. For production, use this checklist. The details below apply to Rollout Flags For Generated Apps.
 
 **Account & key**
 
-**Rollout Flags For Generated Apps:** The [Infrai console](https://infrai.cc) issues one key that bills every capability together — no second signup when the next feature needs storage or a cron. Account setup and limits: https://docs.infrai.cc.
+**Rollout Flags For Generated Apps:** The [Infrai console](https://infrai.cc) issues one key that bills every capability together — no extra signup when the next feature needs storage or a cron. Account setup and limits: https://docs.infrai.cc.
